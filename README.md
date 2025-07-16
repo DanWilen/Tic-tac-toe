@@ -12,8 +12,8 @@ A simple real‑time multiplayer Tic‑Tac‑Toe game built with Node.js, TypeSc
 1. **Clone the repo**
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/tic-tac-toe.git
-   cd tic-tac-toe
+   git clone https://github.com/DanWilen/Tic-tac-toe.git
+   cd Tic-tac-toe
    ```
 2. **Install dependencies**
 
