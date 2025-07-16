@@ -131,3 +131,15 @@ function checkWin(board: Cell[][]): Symbol | null {
 ```
 
 This design keeps game logic encapsulated in the service layer, ensuring clean separation between transport (Socket.IO), controllers, and core game rules.
+
+
+## Potential Improvements
+
+Here are some areas to further enhance the server:
+
+- **State Persistence & Scalability**: Swap the in‑memory Map for Redis (with a Socket.IO adapter) to support clustering and failover.
+- **Reconnection Support**: Implement a reconnect flow so players can resume games after transient disconnects, using a persistent player token.
+- **Security & Rate Limiting**: Integrate request rate limiting and payload size checks to guard against abuse.
+- **Observability**: Add structured logging (e.g. Pino/Winston) and expose metrics (Prometheus) for active games, moves made, and error rates.
+- **Testing & CI/CD**: Extend tests to include full socket-flow integration tests, and add a GitHub Actions pipeline to lint, build, and test on every PR.
+
