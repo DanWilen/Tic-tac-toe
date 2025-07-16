@@ -7,14 +7,12 @@ import { registerGameHandlers } from "./socket";
 const app = express();
 const port = process.env.PORT || 3000;
 
-// serve client/public/*
+// serve client/public/ and client/src*
 const publicPath = path.resolve(__dirname, '../../client/public');
 app.use(express.static(publicPath));
 
-// also serve client/src under /src
 const clientSrc = path.resolve(__dirname, '../../client/src');
 app.use('/src', express.static(clientSrc));
-
 
 // Health‑check endpoint
 app.get("/health", (_req, res) => {
