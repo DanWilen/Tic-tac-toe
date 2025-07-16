@@ -8,14 +8,32 @@ import {
 	MoveData,
 	MoveCallback,
 } from "../types/socketTypes";
+import {
+	joinSchema,
+	moveSchema,
+	SchemaCallbackError,
+} from "./gameContoller.schema";
 
-export function handleCreateGame(socket: Socket, callback: (data: CreateGameCallback) => void) {
+export function handleCreateGame(
+	socket: Socket,
+	callback: (data: CreateGameCallback) => void
+) {
 	const game = GameService.createGame(socket.id);
 	socket.join(game.id);
 	callback({ gameId: game.id, symbol: game.nextTurn });
 }
 
-export function handleJoinGame( socket: Socket, io: Server, data: JoinGameData, callback: (data: JoinGameCallback | { error: string }) => void) {
+export function handleJoinGame(
+	socket: Socket,
+	io: Server,
+	data: JoinGameData,
+	callback: (data: JoinGameCallback | { error: string }) => void
+) {
+	// Zod validation
+	const parse = joinSchema.safeParse(data);
+	if (!parse.success) return callback({ error: SchemaCallbackError.INVALID });
+
+	// Execute joinGame
 	const result = GameService.joinGame(data.gameId, socket.id);
 	if ("error" in result) {
 		return void callback({ error: result.error });
@@ -38,8 +56,23 @@ export function handleJoinGame( socket: Socket, io: Server, data: JoinGameData, 
 	});
 }
 
-export function handleMakeMove( socket: Socket, io: Server, data: MoveData, callback: (data: MoveCallback) => void) {
-	const result = GameService.makeMove(data.gameId, socket.id, data.row, data.col
+export function handleMakeMove(
+	socket: Socket,
+	io: Server,
+	data: MoveData,
+	callback: (data: MoveCallback) => void
+) {
+	// Zod validation
+	const parse = moveSchema.safeParse(data);
+	if (!parse.success)
+		return callback({ success: false, error: "Invalid input format" });
+
+	// Execute makeMove
+	const result = GameService.makeMove(
+		data.gameId,
+		socket.id,
+		data.row,
+		data.col
 	);
 
 	if ("error" in result) {

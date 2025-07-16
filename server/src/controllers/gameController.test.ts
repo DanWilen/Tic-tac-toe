@@ -16,34 +16,19 @@ describe('gameController', () => {
   let callback: jest.Mock;
 
   beforeEach(() => {
-    // Reset mocks
     jest.clearAllMocks();
-
-    // Fake socket
-    socket = {
-      id: 'socket-1',
-      join: jest.fn()
-    };
-
-    // Fake io
-    io = {
-      to: jest.fn().mockReturnThis(),
-      emit: jest.fn()
-    };
-
+    socket = { id: 'socket-1', join: jest.fn() };
+    io = { to: jest.fn().mockReturnThis(), emit: jest.fn() };
     callback = jest.fn();
   });
 
   describe('handleCreateGame', () => {
-    it('should create a game, join room, and callback with gameId and symbol', () => {
-      // Arrange
-      const fakeGame = { id: 'game-123', nextTurn: 'X' };
-      mockedService.createGame.mockReturnValue(fakeGame as any);
+    it('creates a game and returns gameId and symbol', () => {
+      const fakeGame: any = { id: 'game-123', nextTurn: 'X' };
+      mockedService.createGame.mockReturnValue(fakeGame);
 
-      // Act
       handleCreateGame(socket as Socket, callback);
 
-      // Assert
       expect(mockedService.createGame).toHaveBeenCalledWith('socket-1');
       expect(socket.join).toHaveBeenCalledWith('game-123');
       expect(callback).toHaveBeenCalledWith({ gameId: 'game-123', symbol: 'X' });
@@ -51,29 +36,29 @@ describe('gameController', () => {
   });
 
   describe('handleJoinGame', () => {
-    it('should callback error if joinGame returns error', () => {
-      // Arrange
-      mockedService.joinGame.mockReturnValue({ error: 'Game not found' } as any);
-
-      // Act
-      handleJoinGame(socket as Socket, io as Server, { gameId: 'bad-id' }, callback);
-
-      // Assert
-      expect(mockedService.joinGame).toHaveBeenCalledWith('bad-id', 'socket-1');
-      expect(callback).toHaveBeenCalledWith({ error: 'Game not found' });
-      expect(io.to).not.toHaveBeenCalled();
+    it('returns error on invalid input', () => {
+      handleJoinGame(socket as Socket, io as Server, { gameId: 'not-a-uuid' }, callback);
+      expect(mockedService.joinGame).not.toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith({ error: 'Invalid input format' });
     });
 
-    it('should join room, emit gameStarted, and callback success', () => {
-      // Arrange
-      const fakeGame = { id: 'game-456', players: [{ id: 'p1' }, { id: 'p2' }], nextTurn: 'O' };
-      mockedService.joinGame.mockReturnValue({ game: fakeGame as any, symbol: 'O' } as any);
+    it('returns error when GameService returns error', () => {
+      mockedService.joinGame.mockReturnValue({ error: 'Game not found' } as any);
+      handleJoinGame(socket as Socket, io as Server, { gameId: '00000000-0000-0000-0000-000000000000' }, callback);
+      expect(mockedService.joinGame).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith({ error: 'Game not found' });
+    });
 
-      // Act
-      handleJoinGame(socket as Socket, io as Server, { gameId: 'game-456' }, callback);
+    it('joins a valid game', () => {
+      const fakeResult: any = {
+        game: { id: 'game-456', players: [{ id: 'p1' }, { id: 'p2' }], nextTurn: 'O' },
+        symbol: 'O'
+      };
+      mockedService.joinGame.mockReturnValue(fakeResult);
 
-      // Assert
-      expect(mockedService.joinGame).toHaveBeenCalledWith('game-456', 'socket-1');
+      handleJoinGame(socket as Socket, io as Server, { gameId: '00000000-0000-0000-0000-000000000000' }, callback);
+
+      expect(mockedService.joinGame).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000', 'socket-1');
       expect(socket.join).toHaveBeenCalledWith('game-456');
       expect(io.to).toHaveBeenCalledWith('game-456');
       expect(io.emit).toHaveBeenCalledWith('gameStarted', {
@@ -82,59 +67,36 @@ describe('gameController', () => {
         nextTurn: 'O'
       });
       expect(callback).toHaveBeenCalledWith({
-        gameId: 'game-456',
-        symbol: 'O',
-        players: ['p1', 'p2']
+        gameId: 'game-456', symbol: 'O', players: ['p1', 'p2']
       });
     });
   });
 
   describe('handleMakeMove', () => {
-    it('should callback error if makeMove returns error', () => {
-      // Arrange
-      mockedService.makeMove.mockReturnValue({ error: 'Not your turn' } as any);
-
-      // Act
-      handleMakeMove(
-        socket as Socket,
-        io as Server,
-        { gameId: 'game-789', row: 0, col: 0 },
-        callback
-      );
-
-      // Assert
-      expect(mockedService.makeMove).toHaveBeenCalledWith('game-789', 'socket-1', 0, 0);
-      expect(callback).toHaveBeenCalledWith({ success: false, error: 'Not your turn' });
-      expect(io.to).not.toHaveBeenCalled();
+    it('returns error on invalid input', () => {
+      handleMakeMove(socket as Socket, io as Server, { gameId: 'bad', row: 5, col: 5 }, callback);
+      expect(mockedService.makeMove).not.toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith({ success: false, error: 'Invalid input format' });
     });
 
-    it('should emit moveMade and callback success on valid move', () => {
-      // Arrange
-      const fakeMoveResult = {
-        board: [['X', null, null], [null, null, null], [null, null, null]],
-        state: 'playing',
-        winner: null,
-        nextTurn: 'O'
-      };
-      mockedService.makeMove.mockReturnValue(fakeMoveResult as any);
+    it('returns error when GameService returns error', () => {
+      mockedService.makeMove.mockReturnValue({ error: 'Not your turn' } as any);
+      const data = { gameId: '00000000-0000-0000-0000-000000000000', row: 0, col: 0 };
+      handleMakeMove(socket as Socket, io as Server, data, callback);
+      expect(mockedService.makeMove).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000', 'socket-1', 0, 0);
+      expect(callback).toHaveBeenCalledWith({ success: false, error: 'Not your turn' });
+      expect(io.emit).not.toHaveBeenCalled();
+    });
 
-      // Act
-      handleMakeMove(
-        socket as Socket,
-        io as Server,
-        { gameId: 'game-789', row: 0, col: 0 },
-        callback
-      );
+    it('emits moveMade on successful move', () => {
+      const fakeBoard = [['X', null, null],[null,null,null],[null,null,null]];
+      const fakeResult: any = { board: fakeBoard, state: 'playing', winner: null, nextTurn: 'O' };
+      mockedService.makeMove.mockReturnValue(fakeResult);
+      const data = { gameId: '00000000-0000-0000-0000-000000000000', row: 0, col: 0 };
 
-      // Assert
-      expect(mockedService.makeMove).toHaveBeenCalledWith('game-789', 'socket-1', 0, 0);
-      expect(io.to).toHaveBeenCalledWith('game-789');
-      expect(io.emit).toHaveBeenCalledWith('moveMade', {
-        board: fakeMoveResult.board,
-        state: fakeMoveResult.state,
-        winner: fakeMoveResult.winner,
-        nextTurn: fakeMoveResult.nextTurn
-      });
+      handleMakeMove(socket as Socket, io as Server, data, callback);
+      expect(mockedService.makeMove).toHaveBeenCalled();
+      expect(io.emit).toHaveBeenCalledWith('moveMade', fakeResult);
       expect(callback).toHaveBeenCalledWith({ success: true });
     });
   });

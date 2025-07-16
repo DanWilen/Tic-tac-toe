@@ -9,5 +9,8 @@
 		"start:server": "npm --prefix server start",
 		"build": "npm --prefix client run build && npm --prefix server run build",
 		"test": "npm --prefix server test"
+	},
+	"dependencies": {
+		"zod": "^4.0.5"
 	}
 }

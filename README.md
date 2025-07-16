@@ -63,7 +63,7 @@ Enjoy! Feel free to explore the code in `server/` and `client/`.
 ### Server
 
 * **Frameworks & Languages**: Node.js, TypeScript, Express, Socket.IO
-* **Architecture**: Monorepo structure; backend with controllers, services, and an in-memory store for game state
+* **Architecture**: Monorepo structure; backend with controllers (with Zod on inputs), services, and an in-memory store for game state
 * **Game State**: In-memory `Map` for fast lookup; easily extendable to Redis or a database for persistence and horizontal scaling
 * **Testing & Quality**: Jest unit tests covering service logic and controllers; strict TypeScript mode for type safety
 
