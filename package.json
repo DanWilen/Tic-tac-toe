@@ -1,0 +1,13 @@
+{
+	"private": true,
+	"workspaces": [
+		"client",
+		"server"
+	],
+	"scripts": {
+		"start:client": "npm --prefix client start",
+		"start:server": "npm --prefix server start",
+		"build": "npm --prefix client run build && npm --prefix server run build",
+		"test": "npm --prefix server test"
+	}
+}

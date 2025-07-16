@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic‑Tac‑Toe</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="src/state.js"></script>
+  <script defer src="src/app.js"></script>
+  <script defer src="src/ui.js"></script>
+  <style>
+    /* simple “amazing” styling */
+    body {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      min-height: 100vh; margin: 0;
+      background: linear-gradient(135deg,#f5f7fa,#c3cfe2);
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+    h1 { margin: 2rem 0 1rem; font-size: 2.5rem; }
+    #controls {
+      display: flex; flex-direction: column; align-items: center;
+      gap: .5rem; margin-bottom: 1rem;
+    }
+    #controls button, #controls input {
+      font-size: 1rem; padding: .5rem 1rem;
+      border: none; border-radius: .25rem;
+    }
+    #btnCreate, #btnOpenJoin, #btnConfirmJoin, #btnRestart {
+      background: #4f46e5; color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: background .2s;
+    }
+    #btnCreate:hover, #btnOpenJoin:hover,
+    #btnConfirmJoin:hover, #btnRestart:hover {
+      background: #4338ca;
+    }
+    #joinContainer { display: none; }
+    #status {
+      margin: .5rem 0 1rem;
+      font-weight: 500;
+    }
+    #board {
+      display: grid; grid-template-columns: repeat(3, 6rem);
+      grid-template-rows: repeat(3, 6rem); gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .cell {
+      background: white; border-radius: .5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: bold;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      cursor: pointer; user-select: none;
+      transition: background .2s;
+    }
+    .cell.disabled {
+      cursor: default; color: #aaa;
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic‑Tac‑Toe (Dan Wilensky)</h1>
+  <div id="controls">
+    <button id="btnCreate">Create Game</button>
+    <button id="btnOpenJoin">Join Game</button>
+    <div id="joinContainer">
+      <input id="inputJoin" placeholder="Enter Game ID"/>
+      <button id="btnConfirmJoin">Confirm Join</button>
+    </div>
+    <button id="btnRestart" style="display:none;">Create New Game</button>
+  </div>
+
+  <div id="status">Not connected</div>
+  <div id="board"></div>
+</body>
+</html>
